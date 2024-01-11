@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta
+            name="viewport"
+            content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>util</title>
+    <style>
+        .wrapper {
+            display: flex;
+            justify-content: space-around;
+            padding-top: 50px;
+        }
+
+        .wrap {
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        input {
+            width: 400px;
+            height: 30px;
+            margin-left: 10px;
+            font-size: 30px;
+            padding: 10px;
+            color: #555;
+        }
+
+        textarea {
+            width: 400px;
+            margin-left: 10px;
+            padding: 10px;
+            font-family: sans-serif;
+        }
+
+        .wrap span {
+            width: 120px;
+            text-align: right;
+        }
+        #color1,#color2{
+            width: 100px;
+            height: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="time-wrap">
+        <div class="wrap">
+            <span>输入</span>
+            <input id="input" type="text" onchange="handleValueChange(this)" oninput="handleValueChange(this)"/>
+        </div>
+        <div class="wrap">
+            <span>时间</span>
+            <input disabled id="time" type="text"/>
+        </div>
+        <div class="wrap">
+            <span>秒</span>
+            <input disabled id="second" type="text"/>
+        </div>
+        <div class="wrap">
+            <span>毫秒</span>
+            <input disabled id="millisecond" type="text"/>
+        </div>
+        <br/>
+        <div class="wrap">
+            <span>+1天</span>
+            <input disabled id="add1day" type="text"/>
+        </div>
+        <div class="wrap">
+            <span>+1月</span>
+            <input disabled id="add1month" type="text"/>
+        </div>
+    </div>
+
+    <div class="calc-wrap">
+        <div class="wrap">
+            <span>DEC</span>
+            <input id="decimal" type="text" oninput="handleDecimal(this)"/>
+        </div>
+        <div class="wrap">
+            <span>BIN</span>
+            <input id="binary" type="text" oninput="handleBinary(this)"/>
+        </div>
+        <div class="wrap">
+            <span>HEX</span>
+            <input id="hexadecimal" type="text" oninput="handleHexadecimal(this)"/>
+        </div>
+        <hr>
+        <div class="wrap">
+            <span>style</span>
+            <textarea rows="3" id="cssinput" type="text" oninput="handleHexcolor(this)"></textarea>
+            <div id="color1"></div>
+        </div>
+        <div class="wrap">
+            <span>rgba</span>
+            <input disabled id="rgbacolor" type="text"/>
+            <div id="color2"></div>
+        </div>
+    </div>
+</div>
+
+<script src="./moment.min.js"></script>
+<script>
+    function handleValueChange(ctx) {
+        let value = ctx.value.trim();
+        const digitReg = /^\d+$/;
+        if (digitReg.test(value)) {
+            if (value.length === 10) value += '000';
+            value = +value;
+        }
+
+        const ins = moment(value);
+
+        if (!ins._isValid) return;
+        time.value = ins.format('YYYY-MM-DD HH:mm:ss');
+        second.value = ins.unix();
+        millisecond.value = ins.valueOf();
+        add1day.value = ins.add(1, 'day').valueOf();
+        add1month.value = ins.add(1, 'month').valueOf();
+    }
+
+    function handleDecimal(ctx) {
+        const value = ctx.value.trim();
+        binary.value = parseInt(value, 10).toString(2);
+        const hex = parseInt(value, 10).toString(16);
+        hexadecimal.value = (hex.length & 1) === 1 ? '0' + hex : hex;
+    }
+
+    function handleBinary(ctx) {
+        const value = ctx.value.trim();
+        decimal.value = parseInt(value, 2).toString(10);
+        const hex = parseInt(value, 2).toString(16);
+        hexadecimal.value = (hex.length & 1) === 1 ? '0' + hex : hex;
+    }
+
+    function handleHexadecimal(ctx) {
+        const value = ctx.value.trim();
+        decimal.value = parseInt(value, 16).toString(10);
+        binary.value = parseInt(value, 16).toString(2);
+    }
+
+    function handleHexcolor(ctx) {
+        const opacity = ctx.value.match(/opacity: (.*);/)?.[1] || 1
+
+        const colorHex = ctx.value.match(/#(.*);/)[1]
+        color1.style.background = `#${colorHex}`
+        color1.style.opacity = opacity
+
+        const rgbArray = colorHex.match(/../g).map(item => parseInt(item, 16))
+        rgbacolor.value = color2.style.background = `rgba(${rgbArray[0]}, ${rgbArray[1]}, ${rgbArray[2]}, ${opacity})`
+    }
+
+    window.onload = function () {
+        input.value = moment().valueOf();
+        handleValueChange({value: input.value});
+
+        cssinput.value = `opacity: 0.7;\nbackground: #17C7FE;`
+        handleHexcolor({value: cssinput.value})
+    };
+</script>
+</body>
+</html>
